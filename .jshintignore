@@ -1,0 +1,6 @@
+docs
+public/js/lib
+public/build/js/app.js
+node_modules
+coverage
+fields/types/markdown/lib/bootstrap-markdown.js

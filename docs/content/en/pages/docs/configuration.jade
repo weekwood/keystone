@@ -47,6 +47,14 @@ block content
 					td <code>brand</code> <code class="data-type">String</code>
 					td Displayed in the top left hand corner of the Admin UI
 				tr
+					td <code>module root</code> <code class="data-type">String</code>
+					td
+						p This setting tells Keystone the root path of your app. By default, <code>module root</code> points to the path of the first script that required Keystone within your app. This default may be undesireable at times.
+						p Setting <code>module root</code> allows you to specify a custom root path for your app. Overriding the default <code>module root</code> may be useful, for example, when unit testing your app.
+						p <code>module root</code> is used by Keystone's <code>.getPath()</code> method to resolve/expand the paths of the <code>views</code>, <code>favicon</code>, <code>extensions</code>, <code>ssl cert</code>, <code>ssl key</code>, <code>ssl ca</code>, <code>emails</code>, and <code>updates</code> settings.
+						p When setting a custom <code>module root</code> you may use either an absolute or a relative path.
+						p.note If a relative path is used, it will be considered relative to the location of the script from which the setting was made.
+				tr
 					td <code>nav</code> <code class="data-type">Object</code>
 					td
 						p An object that specifies the navigation structure for the Admin UI. Create a key for each section that should be visible in the primary navigation. Each key's value can be a single list path (as is seen in the URL when you view a list) or an array of list paths. When an array is used, secondary navigation is rendered in the Admin UI.
@@ -155,7 +163,6 @@ block content
 					td <code>trust proxy</code> <code class="data-type">Boolean</code>
 					td Set this to enable processing of the HTTP request <code>X-Forwarded-For</code> header. Extracted IP addresses will be available as the array <code>req.ips</code> (<a href="http://expressjs.com/api.html#req.ips">see docs here</a>).
 			
-			
 			.code-header
 				h4 Alternate View Engines
 				p By default, Keystone uses the <strong>Jade</strong> template engine for your views. Here's how you would set up a different engine, e.g. <strong>Swig</strong>.
@@ -163,7 +170,16 @@ block content
 				| var swig = require('swig');
 				| keystone.set('view engine', 'swig');
 				| keystone.set('custom engine', swig.renderFile);
-		
+			
+			.code-header
+				h4 Exposes <code >onHttpServerCreated</code> event
+			pre: code.language-javascript
+				| keystone.start({
+				|     onHttpServerCreated: function() {
+				|       var server = keystone.httpServer;
+				|     }
+				| });
+			
 			a(name='options-ssl')
 			h3 HTTPS Web Server Options
 			
@@ -178,6 +194,7 @@ block content
 						p Whether to start the SSL Server. Defaults to <code class="default-value">false</code>.
 						p When set to <code class="default-value">true</code>, both http and https servers will be started. If <code>ssl key</code> or <code>ssl cert</code> are invalid, just the http server will be started.
 						p When set to <code class="default-value">"only"</code>, only the https server will be started. If <code>ssl key</code> or <code>ssl cert</code> are invalid, KeystoneJS will not start.
+						
 				tr
 					td <code>ssl key</code> <code class="data-type">Path</code>
 					td
@@ -198,8 +215,26 @@ block content
 					td <code>ssl host</code> <code class="data-type">String</code>
 					td
 						p The ip address to listen for request on. Defaults to <code class="default-value">process.env.SSL_IP</code> or the value of the <code>host</code> option.
+				tr
+					td(colspan="2"): p Exposes <code class="">onHttpsServerCreated</code> event during <code class="language-javascript">keystone.start()</code>
+				
+			a(name='options-unix-socket')
+			h3 Unix Socket Web Server Option
 			
+			p Express will listen to a unix socket for connections.   
 			
+			table.table
+				col(width=210)
+				col
+				tr
+					td <code>unix socket</code> <code class="data-type">String</code>
+					td
+						p Path to a writable unix socket. Should be either absolute or relative to <code class="default-value">process.cwd()</code> (which is usually your project root). File will be removed first if present.
+						p When set http and https servers are ignored.
+						
+				tr
+					td(colspan="2"): p Exposes <code class="">onSocketServerCreated</code> event during <code class="language-javascript">keystone.start()</code>	
+						
 			a(name='options-database')
 			h3 Database and User Auth Options
 			
@@ -244,6 +279,7 @@ block content
 							li <code class="default-value">connect-mongostore</code> (supports replica sets, but requires explicit configuration - see below)
 							li <code class="default-value">connect-redis</code>
 						p.note Session store packages are not bundled with Keystone, so make sure you explicitly add the selected session store to your project's <code>package.json</code>.
+						p.note The session configuration passed to Express is available via <code class="language-javascript">keystone.get('express session')</code>
 				tr
 					td <code>session store options</code> <code class="data-type">Object</code>
 					td
@@ -276,6 +312,7 @@ block content
 							|   "prefix": "", // Key prefix defaulting to "sess:"
 							|   "url": "", // e.g. redis://user:pass@host:port/db
 							| }
+						p.note The session options are made available via <code class="language-javascript">keystone.get('session options')</code>
 				tr
 					td <code>back url</code> <code class="data-type">String</code>
 					td
@@ -342,12 +379,17 @@ block content
 					td <code>wysiwyg menubar</code> <code class="data-type">Boolean</code>
 					td
 						p Show the menubar for wysiwyg editor. Defaults to <code class="data-type">false</code>.
-						p See <a href="http://www.tinymce.com/wiki.php/Configuration:menubar">http://www.tinymce.com/wiki.php/Configuration:menubar</a> for more details
+						p See <a href="http://www.tinymce.com/wiki.php/Configuration:menubar">http://www.tinymce.com/wiki.php/Configuration:menubar</a> for more details.
+				tr
+					td <code>wysiwyg importcss</code> <code class="data-type">String</code>
+					td
+						p Sets the <code class="data-type">content_css</code> and configures the <code class="data-type">importcss</code> plugin for TinyMCE.
+						p See <a href="http://www.tinymce.com/wiki.php/Configuration:content_css">http://www.tinymce.com/wiki.php/Configuration:content_css</a> for more details.
 				tr
 					td <code>wysiwyg skin</code> <code class="data-type">String</code>
 					td
-						p Allow to change skin. Defaults to <code class="data-type">keystone</code>.
-						p See <a href="http://www.tinymce.com/wiki.php/Configuration:skin">http://www.tinymce.com/wiki.php/Configuration:skin</a> for more details
+						p Allow you to change the TinyMCE skin. Defaults to <code class="data-type">keystone</code>.
+						p See <a href="http://www.tinymce.com/wiki.php/Configuration:skin">http://www.tinymce.com/wiki.php/Configuration:skin</a> for more details.
 
 							.code-header
 								h4 Example using wysiwyg options
@@ -494,6 +536,8 @@ block content
 					li <code class="default-value">{prefix}/{list.path}/{field.path}/</code> (when <code>cloudinary prefix</code> is set)
 	
 			p.note You may override the default Cloudinary folder by setting the <code class="default-value">folder</code> option directly on a <code>CloudinaryImage</code> field (see <a href="/docs/database#fieldtypes-cloudinaryimage">CloudinaryImage</a> options) or a <code>CloudinaryImages</code> field (see <a href="/docs/database#fieldtypes-cloudinaryimages">CloudinaryImages</a> options).
+			
+			p If you are serving over HTTPS and want to ensure that cloudinary images are also serverd over HTTPS, set the <code>cloudinary secure</code> option to <code class="default-value">true</code>.
 
 			pre: code.language-javascript
 				| keystone.set('cloudinary config', { cloud_name: 'my-cloud', api_key: 'abc', api_secret: '123' });
@@ -505,6 +549,9 @@ block content
 				| 
 				| // optional, will prefix each image public_id with [{prefix}]/{list.path}/{field.path}/
 				| keystone.set('cloudinary folders', true);
+				| 
+				| // optional, will force cloudinary to serve images over https
+				| keystone.set('cloudinary secure', true);
 			
 			
 			a(name='services-embedly')

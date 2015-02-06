@@ -1,6 +1,25 @@
 # Keystone
 
-## v0.2.38 / 2014-12-20
+## v0.2.42 / 2015-01-20
+
+* fixed; backwards-compatibility issues with older versions of connect-mongo
+* fixed; file type / mimetype issues with S3File / AzureFile and LocalFile fields
+
+## v0.2.41 / 2015-01-18
+
+* fixed; issues relating to using mongo and redis as session stores
+* added; option to use the `importcss` plugin for TinyMCE; set `wysiwyg importcss`, thanks [aschwersenz](https://github.com/aschwersenz)
+* added; `MONGODB_URL` environment variable support, thanks [jdr0dn3y](https://github.com/jdr0dn3y)
+
+## v0.2.40 / 2014-12-31
+
+* fixed; issue setting `Boolean` fields to `false` in the Admin UI
+* added; `cors` middleware is now available as `Keystone.cors`
+* fixed; redis session middleware doesn't support callbacks, should now initialise correctly
+* fixed; issues parsing options in keystone.Email, thanks [Brett Newman](https://github.com/snowkeeper)
+
+
+## v0.2.39 / 2014-12-20
 
 * fixed; regression in the Admin UI introduced in 0.2.37, sorry!
 

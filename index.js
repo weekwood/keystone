@@ -39,9 +39,10 @@ var Keystone = function() {
 		'brand': 'Keystone',
 		'compress': true,
 		'headless': false,
-		'logger': 'dev',
+		'logger': ':method :url :status :response-time ms',
 		'auto update': false,
-		'model prefix': null
+		'model prefix': null,
+		'module root': moduleRoot
 	};
 	this._pre = {
 		routes: [],
@@ -96,11 +97,14 @@ var Keystone = function() {
 	}
 	
 	// Attach middleware packages, bound to this instance
-	this.initAPI = require('./lib/middleware/initAPI')(this);
+	this.middleware = {
+		api: require('./lib/middleware/api')(this),
+		cors: require('./lib/middleware/cors')(this)
+	};
 	
 };
 
-_.extend(Keystone.prototype, require('./lib/core/options')(moduleRoot));
+_.extend(Keystone.prototype, require('./lib/core/options')());
 
 
 /**
@@ -161,9 +165,10 @@ var keystone = module.exports = exports = new Keystone();
 
 // Expose modules and Classes
 keystone.utils = utils;
+keystone.Keystone = Keystone;
 keystone.content = require('./lib/content');
 keystone.List = require('./lib/list');
-keystone.Field = require('./lib/field');
+keystone.Field = require('./fields/types/Type');
 keystone.Field.Types = require('./lib/fieldTypes');
 keystone.View = require('./lib/view');
 keystone.Email = require('./lib/email');
@@ -187,7 +192,7 @@ keystone.security = {
 
 Keystone.prototype.import = function(dirname) {
 	
-	var initialPath = path.join(moduleRoot, dirname);
+	var initialPath = path.join(this.get('module root'), dirname);
 	
 	var doImport = function(fromPath) {
 		
